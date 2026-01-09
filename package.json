@@ -19,7 +19,8 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@aigne/core": "^1.71.0"
+    "@aigne/core": "^1.71.0",
+    "@aigne/gemini": "^0.14.15"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
