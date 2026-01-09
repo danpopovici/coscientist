@@ -19,11 +19,11 @@ export interface GeminiOutput extends Message {
  * Create a GeminiChatModel instance
  *
  * @param apiKey - Google API key (defaults to GEMINI_API_KEY or GOOGLE_API_KEY env var)
- * @param model - Model name (defaults to gemini-2.0-flash)
+ * @param model - Model name (defaults to models/gemini-3-flash-preview)
  */
 export function createGeminiModel(
   apiKey?: string,
-  model: string = "gemini-2.0-flash"
+  model: string = "models/gemini-3-flash-preview"
 ): GeminiChatModel {
   return new GeminiChatModel({
     apiKey,
