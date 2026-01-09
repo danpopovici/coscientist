@@ -12,7 +12,7 @@ describe("Gemini Agent", () => {
 
     it("should create model with default model name", () => {
       const model = createGeminiModel("test-api-key");
-      expect(model.credential.model).toBe("models/gemini-3-flash-preview");
+      expect(model.credential.model).toBe("gemini-3-flash-preview");
     });
 
     it("should create model with custom model name", () => {
