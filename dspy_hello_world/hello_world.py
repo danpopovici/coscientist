@@ -4,14 +4,18 @@ DSPy Hello World Example
 This demonstrates the basic concepts of DSPy:
 1. Signatures - Define input/output structure
 2. Modules - Encapsulate prompting logic
-3. Language Models - Backend for generation
+3. Language Models - Backend for generation (via OpenRouter)
 
 To run with an actual LLM:
-    export OPENAI_API_KEY=your-key-here
+    export OPENROUTER_API_KEY=your-key-here
     python hello_world.py
 """
 
+import os
+
 import dspy
+
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 
 
 class Greeter(dspy.Signature):
@@ -34,25 +38,33 @@ class HelloWorld(dspy.Module):
 
 
 def configure_lm(model: str = "openai/gpt-4o-mini") -> dspy.LM:
-    """Configure the language model for DSPy.
+    """Configure the language model for DSPy via OpenRouter.
 
     Args:
-        model: The model identifier (e.g., 'openai/gpt-4o-mini', 'anthropic/claude-3-haiku')
+        model: The model identifier (e.g., 'openai/gpt-4o-mini', 'anthropic/claude-3-haiku-20240307')
 
     Returns:
         Configured language model
     """
-    lm = dspy.LM(model)
+    api_key = os.environ.get("OPENROUTER_API_KEY")
+    if not api_key:
+        raise ValueError("OPENROUTER_API_KEY environment variable is required")
+
+    lm = dspy.LM(
+        model=f"openai/{model}",
+        api_key=api_key,
+        api_base=OPENROUTER_BASE_URL,
+    )
     dspy.configure(lm=lm)
     return lm
 
 
 def main():
     """Run the hello world example."""
-    print("DSPy Hello World Example")
+    print("DSPy Hello World Example (OpenRouter)")
     print("=" * 40)
 
-    # Configure the language model
+    # Configure the language model via OpenRouter
     lm = configure_lm()
     print(f"Configured LM: {lm}")
 

@@ -5,10 +5,12 @@ These tests verify the DSPy structure works correctly.
 Run with: pytest test_hello_world.py -v
 """
 
+import os
+
 import pytest
 import dspy
 
-from hello_world import Greeter, HelloWorld, configure_lm
+from hello_world import Greeter, HelloWorld, configure_lm, OPENROUTER_BASE_URL
 
 
 class TestGreeterSignature:
@@ -72,23 +74,41 @@ class TestDSPyConfiguration:
             assert minor >= 5, f"DSPy minor version {minor} is too old for v2"
 
 
-class TestWithDummyLM:
-    """Tests using DSPy's DummyLM for mocking."""
+class TestOpenRouterConfiguration:
+    """Tests for OpenRouter configuration."""
 
-    def test_hello_world_with_dummy_lm(self):
-        """Test the HelloWorld module with a mock LM."""
-        # Configure a dummy LM that returns predictable output
-        dummy_lm = dspy.LM("openai/gpt-4o-mini", api_key="test", api_base="http://localhost:9999")
+    def test_openrouter_base_url(self):
+        """Verify OpenRouter base URL is correct."""
+        assert OPENROUTER_BASE_URL == "https://openrouter.ai/api/v1"
 
-        # Create module (doesn't require LM to be called yet)
+    def test_configure_lm_requires_api_key(self):
+        """Test that configure_lm raises error without API key."""
+        # Ensure no API key is set
+        old_key = os.environ.pop("OPENROUTER_API_KEY", None)
+        try:
+            with pytest.raises(ValueError, match="OPENROUTER_API_KEY"):
+                configure_lm()
+        finally:
+            if old_key:
+                os.environ["OPENROUTER_API_KEY"] = old_key
+
+    def test_configure_lm_with_api_key(self, monkeypatch):
+        """Test that configure_lm works with API key set."""
+        monkeypatch.setenv("OPENROUTER_API_KEY", "test-key-123")
+        lm = configure_lm()
+        assert lm is not None
+
+    def test_configure_lm_with_custom_model(self, monkeypatch):
+        """Test that configure_lm accepts custom model."""
+        monkeypatch.setenv("OPENROUTER_API_KEY", "test-key-123")
+        lm = configure_lm(model="anthropic/claude-3-haiku-20240307")
+        assert lm is not None
+
+    def test_hello_world_module_creation(self):
+        """Test the HelloWorld module can be created without LM."""
         hello = HelloWorld()
         assert hello is not None
-
-    def test_configure_lm_creates_lm_object(self):
-        """Test that configure_lm creates a proper LM object."""
-        # This will create an LM object (but won't make API calls until used)
-        lm = dspy.LM("openai/gpt-4o-mini", api_key="dummy-key")
-        assert lm is not None
+        assert isinstance(hello, dspy.Module)
 
 
 if __name__ == "__main__":
